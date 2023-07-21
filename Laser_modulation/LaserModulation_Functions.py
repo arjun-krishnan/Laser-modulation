@@ -272,7 +272,7 @@ def calc_R56(A11,A22,dE=7e-4,K=2,m=21,n=-1,wl=800e-9):
     B2=(m+(0.81*m**(1/3)))/((K*m+n)*A2)
     R56_2= B2/(2*np.pi/wl)/dE
     rr2=R56_2                       #optimal R56(2)
-    print("R56(2)= ",R56_2)
+    
     R56_1= np.linspace(500e-6,3000e-6,1000)
     #R56_2= np.linspace(10e-6,85e-6,500)
     #RM=[]
@@ -294,7 +294,9 @@ def calc_R56(A11,A22,dE=7e-4,K=2,m=21,n=-1,wl=800e-9):
         rr1=r12
     else:
         rr1=r11                     #optimal R56(1)
-    print("R56(1)= ",rr1)
+        
+    print("R56(1)= ",rr1*1e6," microns")
+    print("R56(2)= ",R56_2*1e6," microns")
     return(rr1,rr2)
     
 '''    
