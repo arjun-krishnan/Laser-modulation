@@ -1,0 +1,7 @@
+# Properties of lattice
+START
+E0: 1492 #GeV
+WL: 400e-9 
+NPERIOD: 19
+PERIODLEN: 0.25
+END

@@ -1,0 +1,15 @@
+# Parameters for Laser 1
+START
+WL: 800e-9
+SIG_X: 0.8e-3	# sigma width at focus
+SIG_Y: 0.8e-3
+T_FWHM: 45e-15
+E: 2.6e-3
+FOCUS: 1.125
+X0: 0
+Z_OFFSET: 0
+M2: 1.0
+PULSED: False
+PHI: 0
+END
+

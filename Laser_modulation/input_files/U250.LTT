@@ -1,0 +1,10 @@
+# Properties of lattice
+START
+E0: 1492 #GeV
+M1: 800e-9 
+M2: 400e-9
+RAD: 200e-9
+C1: 470		# Chicane 1
+C2: 610		# Chicane 2
+PERIODLEN: 0.25
+END
