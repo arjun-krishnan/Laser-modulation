@@ -37,4 +37,4 @@ To use the input files, adjust the parameters to match the desired lattice and l
 
 - Alternatively, define a lattice using a user-defined field file (.txt). The file should have two columns: the first column indicates the z position in millimeters, and the second column indicates the vertical magnetic field in Tesla, separated by a tab.
 
-- For the special Modulator-Chicane-Modulator-Chicane-Radiator configuration used in the **SPEED project** at *DELTA, TU Dortmund*, use the **SPEED_Lattice** object. This object also requires the LTT file as input, along with additional parameters.
+- For the special Modulator-Chicane-Modulator-Chicane-Radiator configuration used in the **EEHG** project named **SPEED** at *DELTA, TU Dortmund*, use the **SPEED_Lattice** object. This object also requires the LTT file as input, along with additional parameters.
