@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Feb 13 18:58:02 2024
+Electron Tracking Module
 
-@author: arjun
+This module contain the functions for tracking the ensemble of electrons
+through the given magnetic lattice (laser modulator or a chicane)
 """
 import numpy as np
 import pandas as pd

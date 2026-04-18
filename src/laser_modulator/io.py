@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Feb 13 15:32:18 2024
+I/O Module
 
-@author: arjun
+This module contains functions for reading and writing from/to files.
 """
 
 import numpy as np

@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Feb 13 15:47:00 2024
+Components Module
 
-@author: arjun
+This module contains the classes and methods to define the Laser beam, Undulator
+magnetic field and the custom SPEED magnetic field.
 """
+
 from io_functions import read_file
 import numpy as np
 import pandas as pd

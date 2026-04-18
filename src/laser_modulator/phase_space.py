@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Feb 14 09:59:33 2024
+Phase Space Manipulation Module
 
-@author: arjun
+This module contains functions for generating electron bunches, 
+manipulating their phase space distribution, and calculating 
+bunching factors for laser modulation simulations.
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.constants as const
