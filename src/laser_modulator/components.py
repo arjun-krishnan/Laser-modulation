@@ -88,7 +88,7 @@ class Laser:
         else:
             offaxis_pulsed_factor = np.exp(-(Y / self.beamsize_y(Zdif_y))**2 - (X / self.beamsize_x(Zdif_x))**2)
         
-        phase = np.cos(self.k * Z + (self.phi * (const.c * T - Z)**2) - self.omega * T - self.k / 2 * X**2 / R_x - self.k / 2 * Y**2 / R_y) # + np.arctan(Zdif/l1_zRx))  # include this for Gouy phase shift
+        phase = np.cos(self.k * Z + (self.phi * (const.c * T - Z)**2) - self.omega * T - self.k / 2 * X**2 / R_x - self.k / 2 * Y**2 / R_y)  + np.arctan(Zdif/l1_zRx))  
         return central_E_field * offaxis_pulsed_factor * phase
 
 class Modulator:
@@ -152,14 +152,27 @@ class Modulator:
                 B[i] *= 0.75
             i -= 1
         '''
+        padding = 0.1
+        s = np.linspace(0, self.len + 2 * padding, 1000)
+        B = np.zeros_like(s)
         
-        s = np.linspace(0, self.len, 1000)
-        B = self.Bmax * np.sin(2 * np.pi * s / self.periodlen)
+        # Compute sinusoidal field only inside the main undulator region
+        und_start = padding
+        und_end = padding + self.len
+        
         for i in range(len(s)):
-            if s[i] < self.periodlen:
-                B[i] *= 0.25 if s[i] < self.periodlen / 2 else 0.75
-            elif self.len - s[i] < self.periodlen:
-                B[i] *= 0.25 if self.len - s[i] < self.periodlen / 2 else 0.75
+            pos = s[i]
+            if und_start <= pos <= und_end:
+                # Local position within the undulator
+                local_s = pos - und_start
+                B[i] = self.Bmax * np.sin(2 * np.pi * local_s / self.periodlen)
+                
+                # Apply ramp at entrance and exit (over one period)
+                if local_s < self.periodlen:
+                    B[i] *= 0.25 if local_s < self.periodlen / 2 else 0.75
+                elif (self.len - local_s) < self.periodlen:
+                    B[i] *= 0.25 if (self.len - local_s) < self.periodlen / 2 else 0.75
+
         
         if plot:
             plt.figure()
