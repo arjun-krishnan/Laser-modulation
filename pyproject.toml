@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "laser_modulator"
+version = "0.1.0"
+description = "Laser modulation and phase space tracking"
+dependencies = [
+    "numpy",
+    "scipy",
+    "pandas",
+    "matplotlib",
+    "numba"
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]

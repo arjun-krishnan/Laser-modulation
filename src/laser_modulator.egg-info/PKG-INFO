@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: laser_modulator
+Version: 0.1.0
+Summary: Laser modulation and phase space tracking
+Requires-Dist: numpy
+Requires-Dist: scipy
+Requires-Dist: pandas
+Requires-Dist: matplotlib
+Requires-Dist: numba
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"

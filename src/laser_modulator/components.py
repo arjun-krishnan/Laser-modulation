@@ -88,7 +88,7 @@ class Laser:
         else:
             offaxis_pulsed_factor = np.exp(-(Y / self.beamsize_y(Zdif_y))**2 - (X / self.beamsize_x(Zdif_x))**2)
         
-        phase = np.cos(self.k * Z + (self.phi * (const.c * T - Z)**2) - self.omega * T - self.k / 2 * X**2 / R_x - self.k / 2 * Y**2 / R_y)  + np.arctan(Zdif/l1_zRx))  
+        phase = np.cos(self.k * Z + (self.phi * (const.c * T - Z)**2) - self.omega * T - self.k / 2 * X**2 / R_x - self.k / 2 * Y**2 / R_y  + 0.5 * np.arctan(Zdif_x/self.zRx) + 0.5 * np.arctan(Zdif_y/self.zRy) )  
         return central_E_field * offaxis_pulsed_factor * phase
 
 class Modulator:
