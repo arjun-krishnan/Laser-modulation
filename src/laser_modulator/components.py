@@ -216,7 +216,7 @@ class SPEED_Lattice:
         # Update the params dictionary with default values
         params = {key: params.get(key, default_values[key]) for key in default_values}
         
-        print(filename + " parameters :")
+        print(f"{filename} parameters :")
         pprint.pprint(params, sort_dicts=False)
         print()
         

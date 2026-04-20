@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from laser_modulator.components import Laser, Modulator
+from laser_modulator.components import Laser, Modulator, SPEED_Lattice
 
 def test_laser_k_calculation(tmp_path):
     wl = 400e-9
@@ -34,4 +34,22 @@ def test_modulator_boundaries_integral(tmp_path):
         np.testing.assert_allclose(B_start, 0.0, atol=1e-8)
         np.testing.assert_allclose(B_end, 0.0, atol=1e-8)
         np.testing.assert_allclose(B_integral, 0.0, atol=1e-8)
+        
+
+def test_speed_boundaries_integral(tmp_path):
+    dummy_filename = tmp_path/"test_mod_params.LTT"
+    with open(dummy_filename, "w") as f:
+        f.write("START\n")
+        f.write("END\n")
+        
+    speed_test = SPEED_Lattice(dummy_filename)
+    
+    B_start = speed_test.b[0]
+    B_end = speed_test.b[-1]
+    
+    B_integral = np.trapz(speed_test.b, speed_test.l)
+    
+    np.testing.assert_allclose(B_start, 0.0, atol=1e-8)
+    np.testing.assert_allclose(B_end, 0.0, atol=1e-8)
+    np.testing.assert_allclose(B_integral, 0.0, atol=1e-8)
         
