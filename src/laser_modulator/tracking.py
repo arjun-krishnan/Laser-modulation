@@ -6,12 +6,11 @@ This module contain the functions for tracking the ensemble of electrons
 through the given magnetic lattice (laser modulator or a chicane)
 """
 import numpy as np
-import pandas as pd
 import sys
 from time import time
 import scipy.constants as const
 from scipy import special
-from SPEED_functions import coord_change
+
 
 ##### natural constants #####
 c = const.c                     # speed of light
@@ -100,51 +99,4 @@ def lsrmod_track(Mod, Lsr, e_bunch, Lsr2=None, tstep=1e-12, zlim=None, plot_trac
     print("\nRuntime:  " , np.round(endtime-starttime,2) , " sec")
     return bunch  
         
-def chicane_track(bunch_in, R56, R51=0, R52=0, isr=False):
-    RM = pd.read_csv("TM.txt", usecols=range(1, 7))
-    RR = np.array(RM)
-    RR[4, 0], RR[4, 1] = R51, R52    
-    RR[4, 5] = R56
 
-    # pp = np.sum(bunch_in[3:]**2)**0.5
-    pp = np.linalg.norm(bunch_in[3:])
-    dE = np.sqrt((pp**2 * c**2) + (m_e**2 * c**4)) / e_charge - 1492e6
-    MM = np.array([
-        [bunch_in[0]], 
-        [np.arctan(bunch_in[3] / bunch_in[5])], 
-        [bunch_in[1]], 
-        [np.arctan(bunch_in[4] / bunch_in[5])], 
-        [bunch_in[2]], 
-        [dE / 1492e6]
-        ])
-    
-    p_mod = MM.transpose((2, 0, 1))
-    p_end = np.matmul(RR, p_mod)
-    elec_dummy = p_end.transpose((2, 1, 0))[0]
-    # convert to parameter style: [x,y,z,px,py,pz] in laboratory frame
-    bunch_out = coord_change(elec_dummy)
-    return bunch_out
-
-def calc_R56(A11, A22, dE=7e-4, K=2, m=21, n=-1, wl=800e-9):
-    A1, A2 = A11 / dE, A22 / dE
-    B2 = (m + (0.81 * m**(1 / 3))) / ((K * m + n) * A2)
-    R56_2 = B2 / (2 * np.pi / wl) / dE  # optimal R56(2)
-    
-    print("\nOptimum R56 values:")
-    print("R56(2) =", np.round(R56_2 * 1e6, 2), " microns")
-    
-    R56_list = np.linspace(50e-6, 2000e-6, 1000)
-    bn = []
-    for R in R56_list:
-        B1 = R * (2 * np.pi / wl) * dE
-        bn.append(abs(special.jv(m, -(K * m + n) * A2 * B2) * special.jv(n, (A1 * (n * B1 + ((K * m + n) * B2)))) * np.exp(-0.5 * (n * B1 + (K * m + n) * B2)**2)))
-    
-    i = np.argmax(bn)
-    r1 = R56_list[i]
-    bn[i] = 0
-    i = np.argmax(bn)
-    r2 = R56_list[i]
-    R56_1 = r2 if r2 > r1 else r1  # optimal R56(1)
-    print("R56(1) =", np.round(R56_1 * 1e6), " microns")
-    return R56_1, R56_2
-    
