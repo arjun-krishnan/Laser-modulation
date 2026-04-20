@@ -42,7 +42,7 @@ def test_speed_boundaries_integral(tmp_path):
         f.write("START\n")
         f.write("END\n")
         
-    speed_test = SPEED_Lattice(dummy_filename)
+    speed_test = SPEED_Lattice(dummy_filename, plot=False)
     
     B_start = speed_test.b[0]
     B_end = speed_test.b[-1]
