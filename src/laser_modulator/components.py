@@ -72,7 +72,7 @@ class Laser:
         
 #        self.E0 = 2**-0.25 * np.pi**-0.75 * np.sqrt(Z0 * self.E / (self.sigx * self.sigy * self.sigz / c)) * 1.2   # Factor to make the modulation amplitude equal to elegant simulations
         
-        print(filename + " parameters :")
+        print(f"{filename} parameters :")
         pprint.pprint(params, sort_dicts=False)
         print()
         
@@ -121,7 +121,7 @@ class Modulator:
         
         params = {key: params.get(key, default_values[key]) for key in default_values}
         
-        print(filename + " parameters :")
+        print(f"{filename} parameters :")
         pprint.pprint(params, sort_dicts=False)
         print()
         
