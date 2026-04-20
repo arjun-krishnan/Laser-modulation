@@ -6,7 +6,7 @@ This module contains the classes and methods to define the Laser beam, Undulator
 magnetic field and the custom SPEED magnetic field.
 """
 
-from io_functions import read_file
+from laser_modulator.io import read_file
 import numpy as np
 import pandas as pd
 import scipy.constants as const
@@ -113,7 +113,7 @@ class Modulator:
         
         # Assigning default values
         default_values = {
-          'E0': 1492,          # Default energy in GeV
+          'E0': 1492,          # Default energy in MeV
           'WL': 800e-9,          # Default M1 value
           'NPERIOD': 9, 
           'PERIODLEN': 0.25
@@ -155,34 +155,34 @@ class Modulator:
             i -= 1
         '''
         padding = 0.1
-        s = np.linspace(0, self.len + 2 * padding, 1000)
-        B = np.zeros_like(s)
+        self.s = np.linspace(0, self.len + 2 * padding, 1000)
+        self.B = np.zeros_like(self.s)
         
         # Compute sinusoidal field only inside the main undulator region
         und_start = padding
         und_end = padding + self.len
         
-        for i in range(len(s)):
-            pos = s[i]
+        for i in range(len(self.s)):
+            pos = self.s[i]
             if und_start <= pos <= und_end:
                 # Local position within the undulator
                 local_s = pos - und_start
-                B[i] = self.Bmax * np.sin(2 * np.pi * local_s / self.periodlen)
+                self.B[i] = self.Bmax * np.sin(2 * np.pi * local_s / self.periodlen)
                 
                 # Apply ramp at entrance and exit (over one period)
                 if local_s < self.periodlen:
-                    B[i] *= 0.25 if local_s < self.periodlen / 2 else 0.75
+                    self.B[i] *= 0.25 if local_s < self.periodlen / 2 else 0.75
                 elif (self.len - local_s) < self.periodlen:
-                    B[i] *= 0.25 if (self.len - local_s) < self.periodlen / 2 else 0.75
+                    self.B[i] *= 0.25 if (self.len - local_s) < self.periodlen / 2 else 0.75
 
         
         if plot:
             plt.figure()
-            plt.plot(s, B)
+            plt.plot(self.s, self.B)
             plt.xlabel('z (m)')
             plt.ylabel('B (T)')
             
-        self.B_func = interp1d(s,B) 
+        self.B_func = interp1d(self.s,self.B) 
         
 class SPEED_Lattice:
     def __init__(self, filename, plot=True):
