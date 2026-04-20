@@ -97,6 +97,7 @@ def lsrmod_track(Mod, Lsr, e_bunch, Lsr2=None, tstep=1e-12, zlim=None, plot_trac
     
     endtime = time()
     print("\nRuntime:  " , np.round(endtime-starttime,2) , " sec")
+    
     return bunch  
         
 
