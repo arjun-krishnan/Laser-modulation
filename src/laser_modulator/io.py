@@ -8,9 +8,10 @@ This module contains functions for reading and writing from/to files.
 import numpy as np
 import pathlib
 
+
 def read_file(filename):
     parameters = {}
-    with open(filename, 'r') as file:
+    with open(filename, "r") as file:
         lines = file.readlines()
 
         # Initialize flag to indicate whether to start reading parameters
@@ -27,20 +28,19 @@ def read_file(filename):
 
             # If START marker is found, start reading parameters
             if start_reading:
-                key, value = line.split(': ')
+                key, value = line.split(": ")
 
                 parameters[key.upper()] = eval(value)
-                
-    return(parameters)
+
+    return parameters
 
 
-
-def write_results(bunch,file_path):
-    print("Writing to "+file_path+" ...")
+def write_results(bunch, file_path):
+    print("Writing to " + file_path + " ...")
     file = pathlib.Path(file_path)
     if file.is_file():
         ch = input("The file already exist! Overwrite? (Y/N)")
-        if ch == 'y':
+        if ch == "y":
             bunch.to_csv(file_path)
     else:
         bunch.to_csv(file_path)
