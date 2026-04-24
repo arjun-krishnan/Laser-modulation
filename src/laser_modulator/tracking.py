@@ -21,6 +21,10 @@ epsilon_0 = const.epsilon_0     # vacuum permittivity
 mu0 = const.mu_0                # vacuum permeability
 
 def lsrmod_track(Mod, Lsr, e_bunch, Lsr2=None, tstep=1e-12, zlim=None, plot_track=False, disp_Progress=True):
+    
+    if zlim == None:
+        zlim = Mod.len
+        
     N_e = len(e_bunch[0])
     bunch = np.copy(e_bunch)
     z_0 = np.mean(bunch[2])
@@ -30,18 +34,21 @@ def lsrmod_track(Mod, Lsr, e_bunch, Lsr2=None, tstep=1e-12, zlim=None, plot_trac
     progressrate = 10
     progress = 0 
     t = 0
+    
+    max_steps = int(zlim / (3e8 * tstep) * 1.2)
 
     starttime = time()
-    EE = []
-    track_x = []
-    track_z = []
-    dZZ = []
-    ZZ = []
+    EE_history = np.zeros(max_steps)
+    ZZ_history = np.zeros(max_steps)
+    dZZ_history = np.zeros(max_steps)
     
-    if zlim == None:
-        zlim = Mod.len
+    # Pre-allocate tracking arrays (for last 6 electrons)
+    track_x_history = np.zeros((max_steps, 6))
+    track_z_history = np.zeros((max_steps, 6))
     
-    while z_mean < z_0 + zlim:
+    step = 0
+    
+    while z_mean < zlim: # and step < max_steps:
         if disp_Progress:
             if progress < (z_mean) / zlim * progressrate:
                 elapsed = time() - starttime
@@ -52,12 +59,12 @@ def lsrmod_track(Mod, Lsr, e_bunch, Lsr2=None, tstep=1e-12, zlim=None, plot_trac
     
         z = np.copy(bunch[2])
         z_mean = np.mean(z)
-        ZZ.append(z_mean)
+        ZZ_history[step] = z_mean
         
         Efield_x_vec = Lsr.E_field(bunch[0],bunch[1],bunch[2],t)
         if Lsr2 != None: 
             Efield_x_vec += Lsr2.E_field(bunch[0],bunch[1],bunch[2],t)
-        EE.append(Efield_x_vec[0])
+        EE_history[step] = Efield_x_vec[0]
 
         try:
             Bfield_y_vec = Mod.B_func(z) + Efield_x_vec / c
@@ -78,22 +85,21 @@ def lsrmod_track(Mod, Lsr, e_bunch, Lsr2=None, tstep=1e-12, zlim=None, plot_trac
         bunch[0:3] = np.copy(spatial_new)
         bunch[3:] = np.copy(p_new)
         
+        
+        track_x_history[step] = bunch[0, -6:]
+        track_z_history[step] = bunch[2, -6:]
+        
+        dZZ_history[step] = t * c - z_mean
+        
         t += tstep
-        
-        track_x.append(np.copy(bunch[0][-6:]))
-        track_z.append(np.copy(bunch[2][-6:]))
-        
-        dz = (t * c - np.mean(bunch[2]))
-        dZZ.append(dz)
+        step += 1
   
 
     if disp_Progress:
             print('Progress: '+str(progress)+'/'+str(progressrate))
 
     if plot_track == True:
-        track_x = np.array(track_x)
-        track_z = np.array(track_z)
-        return(bunch,track_x,track_z)
+        return(bunch, track_x_history[:step], track_z_history[:step])
     
     endtime = time()
     print("\nRuntime:  " , np.round(endtime-starttime,2) , " sec")
