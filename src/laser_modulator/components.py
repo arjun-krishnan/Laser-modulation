@@ -16,152 +16,126 @@ from os.path import splitext
 import pprint
 
 ##### natural constants #####
-c = const.c  # speed of light
-e_charge = const.e  # electron charge
-m_e = const.m_e  # electron mass in eV/c^2
-Z0 = 376.73  # impedance of free space in Ohm
-epsilon_0 = const.epsilon_0  # vacuum permittivity
-mu0 = const.mu_0  # vacuum permeability
-
+c = const.c                     # speed of light
+e_charge = const.e              # electron charge
+m_e = const.m_e                 # electron mass in eV/c^2
+Z0 = 376.73                     # impedance of free space in Ohm
+epsilon_0 = const.epsilon_0     # vacuum permittivity
+mu0 = const.mu_0                # vacuum permeability
 
 class Laser:
-    def __init__(self, filename):
+    def __init__(self,filename):
         params = read_file(filename)
-
+        
         # Assigning default values
         default_values = {
-            "WL": 800e-9,  # Default wavelength in meters
-            "SIG_X": 1.0e-3,  # Default sigma width of horizontal focus in meters
-            "SIG_Y": 1.0e-3,  # Default sigma width of vertical focus in meters
-            "T_FWHM": 45e-15,  # Default FWHM pulse length in seconds
-            "E": 2.5e-3,  # Default pulse energy in joules
-            "M2": 1.0,  # Default M^2 value of the laser
-            "X0": 0.0,  # Default X offset
-            "Z_OFFSET": 0.0,  # Default Z offset
-            "FOCUS": 1.0,  # Default focus parameter
-            "PULSED": False,  # Default pulsed laser flag
-            "PHI": 0.0,  # Default spectral phase of the laser
+            'WL': 800e-9,          # Default wavelength in meters
+            'SIG_X': 1.0e-3,       # Default sigma width of horizontal focus in meters
+            'SIG_Y': 1.0e-3,       # Default sigma width of vertical focus in meters
+            'T_FWHM': 45e-15,      # Default FWHM pulse length in seconds
+            'E': 2.5e-3,           # Default pulse energy in joules
+            'M2': 1.0,             # Default M^2 value of the laser
+            'X0': 0.0,             # Default X offset
+            'Z_OFFSET': 0.0,       # Default Z offset
+            'FOCUS': 1.0,          # Default focus parameter
+            'PULSED': False,       # Default pulsed laser flag
+            'PHI': 0.0             # Default spectral phase of the laser
         }
         # Update the params dictionary with default values
         params = {key: params.get(key, default_values[key]) for key in default_values}
 
-        self.wl = params["WL"]  # Wavelength in meters
-        self.sigx = params["SIG_X"]  # Sigma width of horizontal focus in meters
-        self.sigy = params["SIG_Y"]  # Sigma width of vertical focus in meters
-        self.pulse_len = params["T_FWHM"]  # FWHM pulse length in seconds
-        self.E = params["E"]  # Pulse energy in joules
-        self.M2 = params["M2"]  # M^2 value of the laser
-        self.X0 = params["X0"]  # X offset
-        self.Z_offset = params["Z_OFFSET"]  # Z offset
-        self.focus = params["FOCUS"]  # Focus parameter
-        self.pulsed = params["PULSED"]  # Pulsed laser flag
-        self.phi = params["PHI"]  # Spectral phase of the laser
-
+        self.wl     = params['WL']            # Wavelength in meters
+        self.sigx   = params['SIG_X']         # Sigma width of horizontal focus in meters
+        self.sigy   = params['SIG_Y']         # Sigma width of vertical focus in meters
+        self.pulse_len = params['T_FWHM']     # FWHM pulse length in seconds
+        self.E      = params['E']             # Pulse energy in joules
+        self.M2     = params['M2']            # M^2 value of the laser
+        self.X0     = params['X0']            # X offset
+        self.Z_offset = params['Z_OFFSET']    # Z offset
+        self.focus  = params['FOCUS']         # Focus parameter
+        self.pulsed = params['PULSED']        # Pulsed laser flag
+        self.phi    = params['PHI']           # Spectral phase of the laser
+        
         self.P_max = self.E / (0.94 * self.pulse_len)
-        I0 = (2 * self.P_max) / (np.pi * 4 * self.sigx * self.sigy)  # Peak intensity
-        self.E0 = np.sqrt(2 * Z0 * I0)
-
-        self.k = 2 * np.pi / self.wl  # Wavenumber in 1/m
-        self.omega = 2 * np.pi * c / self.wl  # Angular frequency in rad/s
-        self.sigz = (
-            np.sqrt(2) * self.pulse_len * c / 2.3548
-        )  # Sigma width of pulse length in meters
-        self.zRx = (
-            np.pi * (2 * self.sigx) ** 2 / (self.M2 * self.wl)
-        )  # Horizontal Rayleigh length in meters
-        self.zRy = (
-            np.pi * (2 * self.sigy) ** 2 / (self.M2 * self.wl)
-        )  # Vertical Rayleigh length in meters
-
-        self.beamsize_x = lambda z: self.sigx * (
-            np.sqrt(1 + z**2 / (self.zRx**2))
-        )  # Horizontal beam size at position z in meters
-        self.beamsize_y = lambda z: self.sigy * (
-            np.sqrt(1 + z**2 / (self.zRy**2))
-        )  # Vertical beam size at position z in meters
-
-        #        self.E0 = 2**-0.25 * np.pi**-0.75 * np.sqrt(Z0 * self.E / (self.sigx * self.sigy * self.sigz / c)) * 1.2   # Factor to make the modulation amplitude equal to elegant simulations
-
+        I0 = (2 * self.P_max) / (np.pi * 4 * self.sigx * self.sigy)     # Peak intensity
+        self.E0 = np.sqrt(2*Z0*I0)   
+        
+        
+        self.k = 2 * np.pi / self.wl                                    # Wavenumber in 1/m
+        self.omega = 2 * np.pi * c / self.wl                            # Angular frequency in rad/s
+        self.sigz = np.sqrt(2) * self.pulse_len * c / 2.3548            # Sigma width of pulse length in meters
+        self.zRx = np.pi * (2 * self.sigx)**2 / (self.M2 * self.wl)     # Horizontal Rayleigh length in meters
+        self.zRy = np.pi * (2 * self.sigy)**2 / (self.M2 * self.wl)     # Vertical Rayleigh length in meters
+        
+        self.beamsize_x = lambda z: self.sigx * (np.sqrt(1 + z**2 / (self.zRx**2)))   # Horizontal beam size at position z in meters
+        self.beamsize_y = lambda z: self.sigy * (np.sqrt(1 + z**2 / (self.zRy**2)))   # Vertical beam size at position z in meters
+        
+#        self.E0 = 2**-0.25 * np.pi**-0.75 * np.sqrt(Z0 * self.E / (self.sigx * self.sigy * self.sigz / c)) * 1.2   # Factor to make the modulation amplitude equal to elegant simulations
+        
         print(f"{filename} parameters :")
         pprint.pprint(params, sort_dicts=False)
         print()
-
-    def E_field(self, X, Y, Z, T):
-        Zdif_x = Z - self.focus  # Distance of electron to focus (mod1_center)
+        
+    def E_field(self,X,Y,Z,T):
+        Zdif_x = Z - self.focus                   # Distance of electron to focus (mod1_center)
         Zdif_y = Z - self.focus
         X = X - self.X0
-        Z_laser = c * T - self.Z_offset  # Position of the laser pulse center
-        R_x = Zdif_x * (1 + (self.zRx / Zdif_x) ** 2)
-        R_y = Zdif_y * (1 + (self.zRy / Zdif_y) ** 2)
+        Z_laser = c * T - self.Z_offset              # Position of the laser pulse center
+        R_x = Zdif_x * (1 + (self.zRx / Zdif_x)**2)
+        R_y = Zdif_y * (1 + (self.zRy / Zdif_y)**2)
         central_E_field = self.E0 * self.sigx / self.beamsize_x(Zdif_x)
-
+        
         if self.pulsed:
-            offaxis_pulsed_factor = np.exp(
-                -((Y / self.beamsize_y(Zdif_y)) ** 2)
-                - (X / self.beamsize_x(Zdif_x)) ** 2
-                - ((Z - Z_laser) / (2 * self.sigz)) ** 2
-            )
+            offaxis_pulsed_factor = np.exp(-(Y / self.beamsize_y(Zdif_y))**2 - (X / self.beamsize_x(Zdif_x))**2 - ((Z - Z_laser) / (2 * self.sigz))**2)
         else:
-            offaxis_pulsed_factor = np.exp(
-                -((Y / self.beamsize_y(Zdif_y)) ** 2)
-                - (X / self.beamsize_x(Zdif_x)) ** 2
-            )
-
-        phase = np.cos(
-            self.k * Z
-            + (self.phi * (const.c * T - Z) ** 2)
-            - self.omega * T
-            - self.k / 2 * X**2 / R_x
-            - self.k / 2 * Y**2 / R_y
-            + 0.5 * np.arctan(Zdif_x / self.zRx)
-            + 0.5 * np.arctan(Zdif_y / self.zRy)
-        )
+            offaxis_pulsed_factor = np.exp(-(Y / self.beamsize_y(Zdif_y))**2 - (X / self.beamsize_x(Zdif_x))**2)
+        
+        phase = np.cos(self.k * Z + (self.phi * (const.c * T - Z)**2) - self.omega * T - self.k / 2 * X**2 / R_x - self.k / 2 * Y**2 / R_y  + 0.5 * np.arctan(Zdif_x/self.zRx) + 0.5 * np.arctan(Zdif_y/self.zRy) )  
         return central_E_field * offaxis_pulsed_factor * phase
-
 
 class Modulator:
     def __init__(self, filename, plot=True):
-
-        if splitext(filename)[-1] == ".txt":
-            df = pd.read_csv(filename, sep="\t")
-            self.l = np.array(df["z"]) / 1000
-            self.b = np.array(df["By"])
-            self.len = self.l[-1]
-            self.B_func = interp1d(self.l, self.b)
+        
+        if splitext(filename)[-1] == '.txt':
+            df = pd.read_csv(filename,sep='\t')
+            self.l = np.array(df['z']) / 1000 
+            self.b = np.array(df['By']) 
+            self.len = self.l[-1]        
+            self.B_func = interp1d(self.l,self.b)
             if plot == True:
                 plt.figure()
                 plt.plot(self.l, self.b)
-                plt.xlabel("z (m)")
-                plt.ylabel("B (T)")
+                plt.xlabel('z (m)')
+                plt.ylabel('B (T)')
             return
-
+        
         params = read_file(filename)
-
+        
         # Assigning default values
         default_values = {
-            "E0": 1492,  # Default energy in MeV
-            "WL": 800e-9,  # Default M1 value
-            "NPERIOD": 9,
-            "PERIODLEN": 0.25,
-        }
-
+          'E0': 1492,          # Default energy in MeV
+          'WL': 800e-9,          # Default M1 value
+          'NPERIOD': 9, 
+          'PERIODLEN': 0.25
+          }
+        
         params = {key: params.get(key, default_values[key]) for key in default_values}
-
+        
         print(f"{filename} parameters :")
         pprint.pprint(params, sort_dicts=False)
         print()
-
-        self.wl = params["WL"]
-        self.E0 = params["E0"]
+        
+        self.wl = params['WL']
+        self.E0 = params['E0']
         e_gamma = self.E0 / 0.511
-        self.periodlen = params["PERIODLEN"]
-        self.periods = params["NPERIOD"]
+        self.periodlen = params['PERIODLEN']
+        self.periods = params['NPERIOD'] 
         self.len = self.periods * self.periodlen
         self.center = self.len / 2
         self.K = np.sqrt(4 * self.wl * e_gamma**2 / self.periodlen - 2)
         self.Bmax = 2 * np.pi * self.K * m_e * c / (e_charge * self.periodlen)
-
-        """
+        
+        '''
         s = np.linspace(0,self.len,1000)
         B = self.Bmax * np.sin(2 * np.pi * s / self.periodlen)
         i = 0
@@ -179,195 +153,152 @@ class Modulator:
             else:
                 B[i] *= 0.75
             i -= 1
-        """
+        '''
         padding = 0.1
         self.s = np.linspace(0, self.len + 2 * padding, 1000)
         self.B = np.zeros_like(self.s)
-
+        
         # Compute sinusoidal field only inside the main undulator region
         und_start = padding
         und_end = padding + self.len
-
+        
         for i in range(len(self.s)):
             pos = self.s[i]
             if und_start <= pos <= und_end:
                 # Local position within the undulator
                 local_s = pos - und_start
                 self.B[i] = self.Bmax * np.sin(2 * np.pi * local_s / self.periodlen)
-
+                
                 # Apply ramp at entrance and exit (over one period)
                 if local_s < self.periodlen:
                     self.B[i] *= 0.25 if local_s < self.periodlen / 2 else 0.75
                 elif (self.len - local_s) < self.periodlen:
-                    self.B[i] *= (
-                        0.25 if (self.len - local_s) < self.periodlen / 2 else 0.75
-                    )
+                    self.B[i] *= 0.25 if (self.len - local_s) < self.periodlen / 2 else 0.75
 
+        
         if plot:
             plt.figure()
             plt.plot(self.s, self.B)
-            plt.xlabel("z (m)")
-            plt.ylabel("B (T)")
-
-        self.B_func = interp1d(self.s, self.B)
-
-
+            plt.xlabel('z (m)')
+            plt.ylabel('B (T)')
+            
+        self.B_func = interp1d(self.s,self.B) 
+        
 class SPEED_Lattice:
     def __init__(self, filename, plot=True):
-
-        if splitext(filename)[-1] == ".txt":
-            df = pd.read_csv(filename, sep="\t")
-            self.l = np.array(df["z"]) / 1000
-            self.b = np.array(df["By"])
-            self.len = self.l[-1]
-            self.B_func = interp1d(self.l, self.b)
+        
+        if splitext(filename)[-1] == '.txt':
+            df = pd.read_csv(filename,sep='\t')
+            self.l = np.array(df['z']) / 1000 
+            self.b = np.array(df['By']) 
+            self.len = self.l[-1]        
+            self.B_func = interp1d(self.l,self.b)
             if plot == True:
                 plt.figure()
                 plt.plot(self.l, self.b)
-                plt.xlabel("z (m)")
-                plt.ylabel("B (T)")
+                plt.xlabel('z (m)')
+                plt.ylabel('B (T)')
             return
-
+        
         params = read_file(filename)
-
+        
         # Assigning default values
         default_values = {
-            "E0": 1492,  # Default energy in GeV
-            "M1": 800e-9,  # Default M1 value
-            "M2": 400e-9,  # Default M2 value
-            "RAD": 200e-9,  # Default radius
-            "C1": 300,  # Default Chicane 1
-            "C2": 500,  # Default Chicane 2
-            "PERIOD": 9,
-            "PERIODLEN": 0.25,
-        }
+          'E0': 1492,          # Default energy in GeV
+          'M1': 800e-9,          # Default M1 value
+          'M2': 400e-9,          # Default M2 value
+          'RAD': 200e-9,         # Default radius
+          'C1': 300,          # Default Chicane 1
+          'C2': 500,          # Default Chicane 2
+          'PERIOD': 9, 
+          'PERIODLEN': 0.25
+          }
         # Update the params dictionary with default values
         params = {key: params.get(key, default_values[key]) for key in default_values}
-
+        
         print(f"{filename} parameters :")
         pprint.pprint(params, sort_dicts=False)
         print()
-
-        M1 = params["M1"]
-        M2 = params["M2"]
-        Rad = params["RAD"]
-        IC1 = params["C1"]  # power supply for chicane 1 ("Danfysik")
-        IC2 = params["C2"]
-
-        self.E0 = params["E0"]
-
+        
+        M1 = params['M1']
+        M2 = params['M2']
+        Rad = params['RAD']
+        IC1 = params['C1']      # power supply for chicane 1 ("Danfysik")
+        IC2 = params['C2']
+        
+        self.E0 = params['E0']
+        
         self.len = 5.74925
-        self.windings = 48  # upper plus lower coil
-        self.gap = 0.05
-        self.period = params["PERIODLEN"]
-
-        IM1 = self.wl2B(M1)  # Current for the Modulator 1 coils
+        self.windings = 48 # upper plus lower coil
+        self.gap = 0.05 
+        self.period = params['PERIODLEN']
+        
+        IM1 = self.wl2B(M1)         # Current for the Modulator 1 coils
         IM2 = self.wl2B(M2)
         IR1 = self.wl2B(Rad)
+        
 
-        ID1 = IM1 / 2  # Delta electronica power supplies
-        ID2 = IM2 / 2
-        ID3 = IM2 / 2
-        ID4 = IR1 / 2
+        ID1 = IM1/2         # Delta electronica power supplies
+        ID2 = IM2/2
+        ID3 = IM2/2
+        ID4 = IR1/2
 
         # coil current
-        curr = [
-            -ID1,
-            IM1,
-            -IM1,
-            IM1,
-            -IM1,
-            IM1,
-            -IM1,
-            IM1,
-            -IC1,
-            -IC1,
-            -ID1,
-            IC1,
-            IC1,
-            IC1,
-            IC1,
-            -ID2,
-            -IC1,
-            -IC1,
-            IM2,
-            -IM2,
-            IM2,
-            -IM2,
-            IM2,
-            -IM2,
-            IM2,
-            -IC2,
-            -ID3,
-            IC2,
-            IC2,
-            -ID4,
-            -IC2,
-            IR1,
-            -IR1,
-            IR1,
-            -IR1,
-            IR1,
-            -IR1,
-            ID4,
-        ]
+        curr=[ -ID1 , IM1 , -IM1 ,  IM1 , -IM1 , IM1 , -IM1 , IM1 , \
+               -IC1 , -IC1, -ID1, IC1 , IC1 , IC1 , IC1 , -ID2 , -IC1 , -IC1 , \
+               IM2 , -IM2 , IM2 , -IM2 , IM2 , -IM2 , IM2 , \
+              -IC2 , -ID3 , IC2 , IC2 , -ID4 , -IC2 , \
+               IR1 , -IR1 , IR1 , -IR1 , IR1 , -IR1 , ID4 ]
 
-        factor = (
-            mu0 * self.windings / self.gap * 1.19
-        )  # The factor 1.19 is the correction term to match the CST simulaitons
-
+        factor = mu0 * self.windings / self.gap * 1.19     #The factor 1.19 is the correction term to match the CST simulaitons
+        
         b0 = np.zeros(len(curr))
         for m in range(len(curr)):
             b0[m] = factor * curr[m]
-
+                
         yoke = 0.08
-        edge = 0.02  # softness parameter for magnet edge
-        drift = 0.5  # before and after magnetic structure
-        dl = 0.0005  # longitudinal interval
-
+        edge = 0.02    # softness parameter for magnet edge
+        drift = 0.5   # before and after magnetic structure
+        dl = 0.0005   # longitudinal interval
+            
         nm = len(curr)
         magnet = self.period / 2
         magnet2 = magnet / 2
         yoke2 = yoke / 2
         len_range = nm * magnet + 2 * drift
-
+        
         nl = int(len_range / dl)
         self.l = np.zeros(nl)
         for k in range(nl):
             self.l[k] = (k - 0.5) * dl
-
+        
         self.b = np.zeros(nl)
-
+        
         for m in range(nm):
             l1 = drift + (m - 1) * magnet  # Magnet center
             for k in range(nl):
-                self.b[k] = self.b[k] + b0[m] / (
-                    np.exp((l1 + magnet2 - yoke2 - self.l[k]) / edge) + 1
-                )
-
+                self.b[k] = self.b[k] + b0[m] / (np.exp((l1 + magnet2 - yoke2 - self.l[k]) / edge) + 1)
+        
             for k in range(nl):
-                self.b[k] = self.b[k] + b0[m] / (
-                    np.exp((self.l[k] - magnet2 - yoke2 - l1) / edge) + 1
-                )
-
+                self.b[k] = self.b[k] + b0[m] / (np.exp((self.l[k] - magnet2 - yoke2 - l1) / edge) + 1)
+        
         if plot:
             plt.figure()
             plt.plot(self.l, self.b)
-            plt.xlabel("z (m)")
-            plt.ylabel("B (T)")
-
+            plt.xlabel('z (m)')
+            plt.ylabel('B (T)')
+        
         self.B_func = interp1d(self.l, self.b)
-
-    def wl2B(self, fund_wl):
+        
+    def wl2B(self,fund_wl):
         if fund_wl == 0:
             I = 0
         else:
-            e_gamma = self.E0 / 0.511
+            e_gamma = self.E0/0.511
             K = np.sqrt(4 * fund_wl * e_gamma**2 / self.period - 2)
             B = 2 * np.pi * K * m_e * c / (e_charge * self.period)
             factor = mu0 * self.windings / self.gap
-            I = (
-                1.14 * B / factor
-            )  # Current for the first modulator. The factor 1.14 is the correction term to match the CST simulations
-
-            return I
+            I = 1.14 * B / factor  # Current for the first modulator. The factor 1.14 is the correction term to match the CST simulations
+            
+            return(I)
+        
