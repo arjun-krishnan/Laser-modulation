@@ -75,7 +75,7 @@ class Laser:
         print(f"{filename} parameters :")
         pprint.pprint(params, sort_dicts=False)
         print()
-        
+    
     def E_field(self,X,Y,Z,T):
         Zdif_x = Z - self.focus                   # Distance of electron to focus (mod1_center)
         Zdif_y = Z - self.focus
