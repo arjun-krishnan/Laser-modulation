@@ -8,6 +8,7 @@ Created on Mon Apr 20 21:25:55 2026
 import numpy as np
 from laser_modulator.components import Modulator, Laser
 from laser_modulator.tracking import lsrmod_track
+import scipy.constants as const
 
 def test_tracking_zero_laser_power(tmp_path):
     mod_file = tmp_path / "mod_params.dat"
@@ -23,8 +24,12 @@ def test_tracking_zero_laser_power(tmp_path):
     
     N_e = 100
     e_bunch = np.zeros((6, N_e))
-    initial_energy_spread = np.random.normal(0, 7e-4, N_e)
-    e_bunch[5,:] = initial_energy_spread
+    
+    gamma_0 = 1492 / 0.511
+    p_z0 = gamma_0 * const.m_e * const.c
+    
+    initial_momentum = p_z0 * (1 + np.random.normal(0, 7e-4, N_e))
+    e_bunch[5,:] = initial_momentum
     
     energy_start = np.copy(e_bunch[5,:])
     
