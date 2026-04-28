@@ -12,4 +12,4 @@ except ImportError:
 if GPU_AVAILABLE:
     from .components import LaserGPU, ModulatorGPU, LatticeGPU
     from .tracking import lsrmod_track_gpu, chicane_track
-    from .utils import define_bunch_gpu, calc_bn, plot_slice
+    from .phase_space import define_bunch_gpu, calc_bn, plot_slice
