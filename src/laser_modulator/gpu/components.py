@@ -13,7 +13,7 @@ from cupyx.scipy.interpolate import PchipInterpolator as cupy_interp1d
 from scipy.interpolate import RegularGridInterpolator
 import matplotlib.pyplot as plt
 import pprint
-from .utils import read_file 
+from ..io import read_file 
 
 c = const.c                     
 e_charge = const.e              
