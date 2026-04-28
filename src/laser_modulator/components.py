@@ -204,7 +204,8 @@ class SPEED_Lattice:
           'C1': 300,          # Default Chicane 1
           'C2': 500,          # Default Chicane 2
           'PERIOD': 9, 
-          'PERIODLEN': 0.25
+          'PERIODLEN': 0.25,
+          'PLOT': False
           }
         # Update the params dictionary with default values
         params = {key: params.get(key, default_values[key]) for key in default_values}
