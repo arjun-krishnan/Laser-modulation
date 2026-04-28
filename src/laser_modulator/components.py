@@ -24,8 +24,9 @@ epsilon_0 = const.epsilon_0     # vacuum permittivity
 mu0 = const.mu_0                # vacuum permeability
 
 class Laser:
-    def __init__(self,filename):
-        params = read_file(filename)
+    def __init__(self,filename=None, **kwargs):
+        params = read_file(filename) if filename else {}
+        params.update(kwargs) # Allow programmatic overrides
         
         # Assigning default values
         default_values = {
@@ -43,6 +44,11 @@ class Laser:
         }
         # Update the params dictionary with default values
         params = {key: params.get(key, default_values[key]) for key in default_values}
+        
+        if filename:
+            print(f"{filename} parameters (GPU) :")
+            pprint.pprint(params, sort_dicts=False)
+            print()
 
         self.wl     = params['WL']            # Wavelength in meters
         self.sigx   = params['SIG_X']         # Sigma width of horizontal focus in meters
@@ -71,10 +77,7 @@ class Laser:
         self.beamsize_y = lambda z: self.sigy * (np.sqrt(1 + z**2 / (self.zRy**2)))   # Vertical beam size at position z in meters
         
 #        self.E0 = 2**-0.25 * np.pi**-0.75 * np.sqrt(Z0 * self.E / (self.sigx * self.sigy * self.sigz / c)) * 1.2   # Factor to make the modulation amplitude equal to elegant simulations
-        
-        print(f"{filename} parameters :")
-        pprint.pprint(params, sort_dicts=False)
-        print()
+
     
     def E_field(self,X,Y,Z,T):
         Zdif_x = Z - self.focus                   # Distance of electron to focus (mod1_center)
@@ -94,7 +97,20 @@ class Laser:
         return central_E_field * offaxis_pulsed_factor * phase
 
 class Modulator:
-    def __init__(self, filename, plot=True):
+    def __init__(self, filename=None, **kwargs):
+        params = read_file(filename) if filename else {}
+        params.update(kwargs)
+        
+        # Assigning default values
+        default_values = {
+          'E0': 1492,          # Default energy in MeV
+          'WL': 800e-9,          # Default M1 value
+          'NPERIOD': 9, 
+          'PERIODLEN': 0.25,
+          'PLOT': False
+          }
+        
+        params = {key: params.get(key, default_values[key]) for key in default_values}
         
         if splitext(filename)[-1] == '.txt':
             df = pd.read_csv(filename,sep='\t')
@@ -102,24 +118,14 @@ class Modulator:
             self.b = np.array(df['By']) 
             self.len = self.l[-1]        
             self.B_func = interp1d(self.l,self.b)
-            if plot == True:
+            if params['PLOT'] == True:
                 plt.figure()
                 plt.plot(self.l, self.b)
                 plt.xlabel('z (m)')
                 plt.ylabel('B (T)')
             return
         
-        params = read_file(filename)
         
-        # Assigning default values
-        default_values = {
-          'E0': 1492,          # Default energy in MeV
-          'WL': 800e-9,          # Default M1 value
-          'NPERIOD': 9, 
-          'PERIODLEN': 0.25
-          }
-        
-        params = {key: params.get(key, default_values[key]) for key in default_values}
         
         print(f"{filename} parameters :")
         pprint.pprint(params, sort_dicts=False)
@@ -176,7 +182,7 @@ class Modulator:
                     self.B[i] *= 0.25 if (self.len - local_s) < self.periodlen / 2 else 0.75
 
         
-        if plot:
+        if params['PLOT']:
             plt.figure()
             plt.plot(self.s, self.B)
             plt.xlabel('z (m)')
@@ -185,22 +191,9 @@ class Modulator:
         self.B_func = interp1d(self.s,self.B) 
         
 class SPEED_Lattice:
-    def __init__(self, filename, plot=True):
-        
-        if splitext(filename)[-1] == '.txt':
-            df = pd.read_csv(filename,sep='\t')
-            self.l = np.array(df['z']) / 1000 
-            self.b = np.array(df['By']) 
-            self.len = self.l[-1]        
-            self.B_func = interp1d(self.l,self.b)
-            if plot == True:
-                plt.figure()
-                plt.plot(self.l, self.b)
-                plt.xlabel('z (m)')
-                plt.ylabel('B (T)')
-            return
-        
-        params = read_file(filename)
+    def __init__(self, filename, **kwargs):
+        params = read_file(filename) if filename else {}
+        params.update(kwargs)
         
         # Assigning default values
         default_values = {
@@ -215,6 +208,19 @@ class SPEED_Lattice:
           }
         # Update the params dictionary with default values
         params = {key: params.get(key, default_values[key]) for key in default_values}
+        
+        if splitext(filename)[-1] == '.txt':
+            df = pd.read_csv(filename,sep='\t')
+            self.l = np.array(df['z']) / 1000 
+            self.b = np.array(df['By']) 
+            self.len = self.l[-1]        
+            self.B_func = interp1d(self.l,self.b)
+            if params['PLOT'] == True:
+                plt.figure()
+                plt.plot(self.l, self.b)
+                plt.xlabel('z (m)')
+                plt.ylabel('B (T)')
+            return
         
         print(f"{filename} parameters :")
         pprint.pprint(params, sort_dicts=False)
@@ -282,7 +288,7 @@ class SPEED_Lattice:
             for k in range(nl):
                 self.b[k] = self.b[k] + b0[m] / (np.exp((self.l[k] - magnet2 - yoke2 - l1) / edge) + 1)
         
-        if plot:
+        if params['PLOT']:
             plt.figure()
             plt.plot(self.l, self.b)
             plt.xlabel('z (m)')

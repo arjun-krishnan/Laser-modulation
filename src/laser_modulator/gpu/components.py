@@ -175,7 +175,6 @@ class ModulatorGPU:
             'WL': 800e-9,
             'PERIODS': 9,
             'PERIODLEN': 0.25,
-            'IS2D': False,
             'PLOT': False
         }
         params = {key: params.get(key, default_values[key]) for key in default_values}
@@ -184,7 +183,6 @@ class ModulatorGPU:
         self.wl = cp.float64(params['WL'])
         self.periods = int(params['PERIODS'])
         self.periodlen = cp.float64(params['PERIODLEN'])
-        self.is2d = params['IS2D']
         plot_flag = params['PLOT']
 
         e_gamma = self.E0 / cp.float64(0.511)
@@ -226,7 +224,7 @@ class ModulatorGPU:
         self.B_func = cupy_interp1d(self.l, self.b, extrapolate=True)
 
 
-class LatticeGPU:
+class SPEED_LatticeGPU:
     def __init__(self, filename=None, **kwargs):
         params = read_file(filename) if filename else {}
         params.update(kwargs)
