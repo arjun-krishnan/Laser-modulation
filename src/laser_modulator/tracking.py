@@ -82,8 +82,8 @@ def lsrmod_track(Mod, Lsr, e_bunch, Lsr2=None, tstep=1e-12, zlim=None, plot_trac
         gamma_vec_new = np.sqrt((p_vec_new / m_e / c)**2 + 1)    
                        
         spatial_new = bunch[0:3,:] + p_new / m_e / gamma_vec_new * tstep       
-        bunch[0:3] = np.copy(spatial_new)
-        bunch[3:] = np.copy(p_new)
+        bunch[0:3] = spatial_new
+        bunch[3:] = p_new
         
         
         track_x_history[step] = bunch[0, -6:]
